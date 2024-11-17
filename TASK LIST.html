@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAMCO OPERATIONS TO DO LIST</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('https://assets.aboutamazon.com/dims4/default/78680d6/2147483647/strip/true/crop/1600x900+0+0/resize/767x431!/quality/90/?url=https%3A%2F%2Famazon-blogs-brightspot.s3.amazonaws.com%2F3d%2F02%2F89ef040a44f58d8169a649f7a226%2Frivian-inline-1600x900.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        h3 {
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        input[type="text"], input[type="date"] {
+            padding: 8px;
+            width: 100%;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+        }
+
+        .completed {
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RAMCO OPERATIONS TO DO LIST</h1>
+
+        <h3>Add Task</h3>
+        <label for="task-name">Task:</label>
+        <input type="text" id="task-name" placeholder="Enter the task" required><br>
+        
+        <label for="assigned-name">Assigned by:</label>
+        <input type="text" id="assigned-name" placeholder="Enter your name" required><br>
+        
+        <button class="btn" onclick="addTask()">Add Task</button>
+        <button class="btn" onclick="viewHistory()">View History</button>
+
+        <h3>Pending Task List</h3>
+        <table id="task-table">
+            <thead>
+                <tr>
+                    <th>Assigned Date</th>
+                    <th>Task</th>
+                    <th>Assigned by</th>
+                    <th>Completed</th>
+                </tr>
+            </thead>
+            <tbody id="task-list">
+                <!-- Task rows will be added here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const taskList = JSON.parse(localStorage.getItem("taskList")) || [];
+        const completedTasks = JSON.parse(localStorage.getItem("completedTasks")) || [];
+
+        function addTask() {
+            const taskName = document.getElementById("task-name").value;
+            const assignedName = document.getElementById("assigned-name").value;
+            const taskDate = new Date().toLocaleDateString();
+
+            if (taskName && assignedName) {
+                const newTask = {
+                    date: taskDate,
+                    task: taskName,
+                    assignedBy: assignedName
+                };
+                taskList.push(newTask);
+                localStorage.setItem("taskList", JSON.stringify(taskList));
+                displayTasks();
+            } else {
+                alert("Please complete all fields.");
+            }
+        }
+
+        function markCompleted(index) {
+            const task = taskList[index];
+            const completedBy = prompt("Enter your name to mark the task as completed:");
+            
+            if (completedBy) {
+                completedTasks.push({ ...task, completedBy });
+                localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
+                taskList.splice(index, 1);
+                localStorage.setItem("taskList", JSON.stringify(taskList));
+                displayTasks();
+            } else {
+                alert("You must enter a name to complete the task.");
+            }
+        }
+
+        function displayTasks() {
+            const taskTable = document.getElementById("task-list");
+            taskTable.innerHTML = "";
+
+            taskList.forEach((task, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${task.date}</td>
+                    <td>${task.task}</td>
+                    <td>${task.assignedBy}</td>
+                    <td><button class="btn" onclick="markCompleted(${index})">Mark as Completed</button></td>
+                `;
+                taskTable.appendChild(row);
+            });
+        }
+
+        function viewHistory() {
+            const historyWindow = window.open("", "Task History", "width=600,height=400");
+            historyWindow.document.write("<h1>Task History</h1>");
+            historyWindow.document.write("<table border='1'><thead><tr><th>Date</th><th>Task</th><th>Assigned by</th><th>Completed by</th></tr></thead><tbody>");
+            
+            completedTasks.forEach(task => {
+                historyWindow.document.write(`<tr><td>${task.date}</td><td>${task.task}</td><td>${task.assignedBy}</td><td>${task.completedBy}</td></tr>`);
+            });
+            
+            historyWindow.document.write("</tbody></table>");
+        }
+
+        displayTasks();
+    </script>
+</body>
+</html>
